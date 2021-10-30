@@ -16,10 +16,7 @@ public class TagDTO {
         this.name = tag.getName();
         tag.getPhotos().forEach(photo->this.photos.add(photo.getFileName()));
     }
-    public Tag getEntity(){
-        Tag p = new Tag(this.name);
-        return p;
-    }
+
     public static List<TagDTO> toList(List<Tag> tags) {
         return tags.stream().map(TagDTO::new).collect(Collectors.toList());
     }
@@ -30,6 +27,22 @@ public class TagDTO {
         if (o == null || getClass() != o.getClass()) return false;
         TagDTO tagDTO = (TagDTO) o;
         return Objects.equals(name, tagDTO.name);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<String> getPhotos() {
+        return photos;
+    }
+
+    public void setPhotos(List<String> photos) {
+        this.photos = photos;
     }
 
     @Override

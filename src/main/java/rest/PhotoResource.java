@@ -31,7 +31,7 @@ public class PhotoResource {
     @GET
     @Path("/{id}")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response getById(@PathParam("id") int id) throws EntityNotFoundException {
+    public Response getById(@PathParam("id") String id) throws EntityNotFoundException {
         PhotoDTO p = FACADE.getById(id);
         return Response.ok().entity(GSON.toJson(p)).build();
     }
@@ -58,9 +58,8 @@ public class PhotoResource {
     @Path("{id}")
     @Produces({MediaType.APPLICATION_JSON})
     @Consumes({MediaType.APPLICATION_JSON})
-    public Response update(@PathParam("id") int id, String content) throws EntityNotFoundException {
+    public Response update(@PathParam("id") String id, String content) throws EntityNotFoundException {
         PhotoDTO pdto = GSON.fromJson(content, PhotoDTO.class);
-        pdto.setId(id);
         PhotoDTO updated = FACADE.update(pdto);
         return Response.ok().entity(GSON.toJson(updated)).build();
     }
@@ -68,7 +67,7 @@ public class PhotoResource {
     @DELETE
     @Path("{id}")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response delete(@PathParam("id") int id) throws EntityNotFoundException {
+    public Response delete(@PathParam("id") String id) throws EntityNotFoundException {
         PhotoDTO deleted = FACADE.delete(id);
         return Response.ok().entity(GSON.toJson(deleted)).build();
     }

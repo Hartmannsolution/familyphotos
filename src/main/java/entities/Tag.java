@@ -11,11 +11,8 @@ public class Tag {
     @Id
     @Column(name = "tagname", length = 35)
     private String name;
-    @ManyToMany
-    @JoinTable( // This is now the owner side of the relationsship
-            name = "photo_tag",
-            joinColumns = @JoinColumn(name = "tag_id"),
-            inverseJoinColumns = @JoinColumn(name = "photo_id"))
+
+    @ManyToMany(mappedBy = "tags") //, cascade = CascadeType.PERSIST) //, fetch = FetchType.EAGER) //Target side of relationsship (inverse side)
     private List<Photo> photos = new ArrayList();
 
     public Tag() {
@@ -42,5 +39,12 @@ public class Tag {
     }
     public void addPhoto(Photo photo) {
         this.photos.add(photo);
+    }
+
+    @Override
+    public String toString() {
+        return "Tag{" +
+                "name='" + name + '\'' +
+                '}';
     }
 }

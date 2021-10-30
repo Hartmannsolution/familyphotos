@@ -118,11 +118,10 @@ public class PhotoRessourceTest {
         given()
                 .contentType(ContentType.JSON)
 //                .pathParam("id", p1.getId()).when()
-                .get("/photo/{id}",p1.getId())
+                .get("/photo/{id}",p1.getFileName())
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.OK_200.getStatusCode())
-                .body("id", equalTo(p1.getId()))
                 .body("name", equalTo(p1.getFileName()))
                 .body("tags", hasItems(hasEntry("name","Joseph"),hasEntry("name","Alberta")));
     }
@@ -142,7 +141,7 @@ public class PhotoRessourceTest {
 
     @Test
     public void testPrintResponse(){
-        Response response = given().when().get("/photo/"+p1.getId());
+        Response response = given().when().get("/photo/"+p1.getFileName());
         ResponseBody body = response.getBody();
 
         System.out.println(body.prettyPrint());
@@ -155,7 +154,7 @@ public class PhotoRessourceTest {
 
     @Test
     public void exampleJsonPathTest() {
-        Response res = given().get("/photo/"+p1.getId());
+        Response res = given().get("/photo/"+p1.getFileName());
         assertEquals(200, res.getStatusCode());
         String json = res.asString();
         JsonPath jsonPath = new JsonPath(json);
@@ -229,11 +228,10 @@ public class PhotoRessourceTest {
                 .and()
                 .body(requestBody)
                 .when()
-                .put("/photo/"+p2.getId())
+                .put("/photo/"+p2.getFileName())
                 .then()
                 .assertThat()
                 .statusCode(200)
-                .body("id", equalTo(p2.getId()))
                 .body("name", equalTo("Betty"))
                 .body("description", equalTo(23))
                 .body("tags", hasItems(hasEntry("name","Alberta")));
@@ -243,11 +241,11 @@ public class PhotoRessourceTest {
     public void testDeletePhoto() {
         given()
                 .contentType(ContentType.JSON)
-                .pathParam("id", p2.getId())
+                .pathParam("id", p2.getFileName())
                 .delete("/photo/{id}")
                 .then()
                 .statusCode(200)
-                .body("id",equalTo(p2.getId()));
+                .body("name",equalTo(p2.getFileName()));
     }
 }
 

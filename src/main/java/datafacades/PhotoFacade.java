@@ -48,7 +48,8 @@ public class PhotoFacade implements IDataFacade<Photo>, IExtraFunc<Tag> {
     private EntityManager getEntityManager() {
         return emf.createEntityManager();
     }
-    
+
+    @Override
     public Photo create(Photo p){
         EntityManager em = getEntityManager();
         try {
@@ -70,7 +71,7 @@ public class PhotoFacade implements IDataFacade<Photo>, IExtraFunc<Tag> {
     }
 
     @Override
-    public Photo getById(int id) throws EntityNotFoundException {
+    public Photo getById(String id) throws EntityNotFoundException {
         EntityManager em = getEntityManager();
         Photo p = em.find(Photo.class, id);
         if (p == null)
@@ -95,18 +96,20 @@ public class PhotoFacade implements IDataFacade<Photo>, IExtraFunc<Tag> {
     }
 
     @Override
-    public Photo update(Photo Photo) throws EntityNotFoundException {
-        if (Photo.getId() == 0)
-            throw new IllegalArgumentException("No Photo can be updated when id is missing");
+    public Photo update(Photo photo) throws EntityNotFoundException {
+        System.out.println(photo);
         EntityManager em = getEntityManager();
+        if (photo.getFileName() == null)
+            throw new IllegalArgumentException("No Photo by that name. Not updated");
         em.getTransaction().begin();
-        Photo p = em.merge(Photo);
+        Photo p = em.merge(photo);
+        System.out.println(p);
         em.getTransaction().commit();
         return p;
     }
 
     @Override
-    public Photo delete(int id) throws EntityNotFoundException{
+    public Photo delete(String id) throws EntityNotFoundException{
         EntityManager em = getEntityManager();
         Photo p = em.find(Photo.class, id);
         if (p == null)
@@ -116,7 +119,6 @@ public class PhotoFacade implements IDataFacade<Photo>, IExtraFunc<Tag> {
         em.getTransaction().commit();
         return p;
     }
-
 
     public static void main(String[] args) {
         emf = EMF_Creator.createEntityManagerFactory();

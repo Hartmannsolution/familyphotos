@@ -95,7 +95,7 @@ class PhotoFacadeTest {
     void getById() throws EntityNotFoundException {
         System.out.println("Testing getbyid(id)");
         Photo expected = p1;
-        Photo actual = facade.getById(p1.getId());
+        Photo actual = facade.getById(p1.getFileName());
         assertEquals(expected, actual);
     }
 
@@ -137,7 +137,7 @@ class PhotoFacadeTest {
     @Test
     void delete() throws EntityNotFoundException {
         System.out.println("Testing delete(id)");
-        Photo p = facade.delete(p1.getId());
+        Photo p = facade.delete(p1.getFileName());
         int expected = 1;
         int actual = facade.getAll().size();
         assertEquals(expected, actual);

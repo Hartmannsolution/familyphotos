@@ -1,31 +1,24 @@
 package entities;
 
+import dtos.PhotoDTO;
+
 import javax.persistence.*;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.time.*;
+import java.util.*;
 
 @Table(name = "photo")
 @Entity
 @NamedQuery(name = "Photo.deleteAllRows", query = "DELETE from Photo")
 public class Photo {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "FotoId", nullable = false)
-    private Integer id;
-
-    @Column(name = "FilNavn", nullable = false, length = 35)
+    @Column(name = "FilNavn", length = 35)
     private String fileName;
 
     @Column(name = "Location", nullable = false, length = 35)
     private String location;
 
 
-    @Column(name = "VisNr")
+    @Column(name = "VisNr", updatable = false)
     private int viewNo;
 
     @Lob
@@ -38,18 +31,23 @@ public class Photo {
 
 //    @CreationTimestamp //For Hibernate only
 //    @Temporal(TemporalType.TIMESTAMP) //NOt necessary to annotate with @Temporal when using java 8 time.LocalDateTime (translates to TIMESTAMP on mysql
-    @Column(name = "Oprettet")
+    @Column(name = "Oprettet", updatable = false)
 //    @CreationTimestamp //this adds the default timestamp on save BUT only for hibernate
 //    @UpdateTimestamp //this update the timestamp everytime the entity is changed
     private java.time.LocalDateTime created;
 
 //    @UpdateTimestamp //For Hibernate
-//    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "Rettet")
+//    @Temporal(TemporalType.TIMESTAMP) //NOt necessary when using java.time.LoalDateTime
+    @Column(name = "Rettet")//, updatable = false) //We have to make it updatable since it is not handles on database level. PROBLEM: DTO does not contain dates so when photo entities return from the user, their dates are null.
     private LocalDateTime editted;
 
-    @ManyToMany(mappedBy = "photos") //, cascade = CascadeType.PERSIST) //, fetch = FetchType.EAGER) //Target side of relationsship (inverse side)
-    private List<Tag> tags = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.EAGER) //with FetchType.Lazy we only get the tags when we specifically ask for them (and ONLY if connected to an EM)
+    @JoinTable( // This is now the owner side of the relationsship
+            name = "photo_tag",
+            joinColumns = @JoinColumn(name = "photo_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    private Set<Tag> tags = new HashSet<>();
 
     public Photo() {
     }
@@ -60,20 +58,16 @@ public class Photo {
         this.photoTxt = photoTxt;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
     // Database is not set to handle dates, so I do it with JPA lifecycle methods. For more see: https://www.baeldung.com/jpa-entity-lifecycle-events
     @PreUpdate
     public void onUpdate() {
-        editted = LocalDateTime.now();
+        editted = LocalDateTime.now(ZoneId.of("GMT+02:00"));
     }
 
     @PrePersist
     public void onPersist(){
-        editted = LocalDateTime.now();
-        created = LocalDateTime.now();
+        editted = LocalDateTime.now(ZoneId.of("GMT+02:00"));
+        created = LocalDateTime.now(ZoneId.of("GMT+02:00"));
     }
 
     public LocalDateTime getEditted() {return editted;}
@@ -122,15 +116,11 @@ public class Photo {
         this.fileName = fileName;
     }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public List<Tag> getTags() {
+    public Set<Tag> getTags() {
         return tags;
     }
 
-    public void setTags(List<Tag> tags) {
+    public void setTags(Set<Tag> tags) {
         this.tags = tags;
     }
 
@@ -139,19 +129,24 @@ public class Photo {
         if(!tag.getPhotos().contains(this))
             tag.getPhotos().add(this);
     }
+    public void removeTag(Tag tag) {
+        this.tags.remove(tag);
+        if(!tag.getPhotos().contains(this))
+            tag.getPhotos().remove(this);
+    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Photo photo = (Photo) o;
-        return Objects.equals(id, photo.id) && Objects.equals(fileName, photo.fileName) && Objects.equals(photoTxt, photo.photoTxt);
+        return Objects.equals(location, photo.location) && Objects.equals(fileName, photo.fileName) && Objects.equals(photoTxt, photo.photoTxt);
     }
 
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, fileName, photoTxt);
+        return Objects.hash(location, fileName, photoTxt);
     }
 
     public static void main(String[] args) {
@@ -159,5 +154,19 @@ public class Photo {
                 p.onUpdate();
         System.out.println(p.editted);
 
+    }
+
+    @Override
+    public String toString() {
+        return "Photo{" +
+                "fileName='" + fileName + '\'' +
+                ", location='" + location + '\'' +
+                ", viewNo=" + viewNo +
+                ", photoTxt='" + photoTxt + '\'' +
+                ", photoTxtAdd='" + photoTxtAdd + '\'' +
+                ", created=" + created +
+                ", editted=" + editted +
+                ", tags=" + tags +
+                '}';
     }
 }
