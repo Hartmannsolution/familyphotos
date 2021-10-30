@@ -82,7 +82,7 @@ class PhotoFacadeTest {
 
     @Test
     void createWithKnownTags() {
-        System.out.println("Testing create(Photo p) with Tagren added");
+        System.out.println("Testing create(Photo p) with Tags added");
         Photo p = new Photo("Somewhere","TestPhoto","Something");
         p.addTag(t1);
         p.addTag(t2);
@@ -125,7 +125,7 @@ class PhotoFacadeTest {
 
     @Test
     void updateWithTags() throws EntityNotFoundException {
-        System.out.println("Testing Update(Photo p) with known Tagren");
+        System.out.println("Testing Update(Photo p) with known Tags");
         p2.addTag(t1);
         p2.addTag(t2);
         Photo p = facade.update(p2);

@@ -43,8 +43,11 @@ public class PhotoDTOFacade implements IDataFacade<PhotoDTO>, IExtraFunc<TagDTO>
         EntityManager em = EMF.createEntityManager();
         Photo photo = em.find(Photo.class, dto.getName());
         System.out.println("GET ENTITY: "+photo); //Tags are empty
-        if (photo == null)
+        if (photo == null){
             photo = new Photo(dto.getLocation(),dto.getName(), dto.getDescription());
+            final Photo p = photo; //p must be final to work inside lambda
+            dto.getTags().forEach(tag->p.addTag(getEntity(tag))); //Changed photo.tags to Set to avoid duplicates
+        }
         else{
             //Copy all properties from DTO to Entity (that we got from DB)
             if(dto.getLocation()!=null) photo.setLocation(dto.getLocation());
