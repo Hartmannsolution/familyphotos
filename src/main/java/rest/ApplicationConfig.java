@@ -27,6 +27,7 @@ public class ApplicationConfig extends Application {
         resources.add(org.glassfish.jersey.jsonb.internal.JsonBindingProvider.class);
         resources.add(org.glassfish.jersey.server.wadl.internal.WadlResource.class);
         resources.add(rest.PhotoResource.class);
+        resources.add(rest.TestResource.class);
     }
     
 }
