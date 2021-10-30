@@ -16,6 +16,7 @@ class PhotoFacadeTest {
 
     private static EntityManagerFactory emf;
     private static IDataFacade<Photo> facade;
+    private static IExtraFunc<Tag> tagsFacade;
     Photo p1,p2;
     Tag t1, t2;
 
@@ -23,6 +24,7 @@ class PhotoFacadeTest {
     public static void setUpClass() {
         emf = EMF_Creator.createEntityManagerFactoryForTest();
         facade = PhotoFacade.getFacade(emf);
+        tagsFacade = PhotoFacade.getTagFacade(emf);
     }
 
     @AfterAll
@@ -39,8 +41,8 @@ class PhotoFacadeTest {
             em.getTransaction().begin();
             em.createNamedQuery("Tag.deleteAllRows").executeUpdate();
             em.createNamedQuery("Photo.deleteAllRows").executeUpdate();
-            p1 = new Photo("Somewhere", 1909, "Dette er et meget gammelt billede");
-            p2 = new Photo("Some file name", 1990, "Dette er et billede af noget");
+            p1 = new Photo("my location","Somewhere", "Dette er et meget gammelt billede");
+            p2 = new Photo("some place","Some file name", "Dette er et billede af noget");
             t1 = new Tag("Dorthea");
             t2 = new Tag("Frederik");
             em.persist(p1);
@@ -61,7 +63,7 @@ class PhotoFacadeTest {
     @Test
     void create() {
         System.out.println("Testing create(Photo p)");
-        Photo p = new Photo("TestPhoto",1990, "Something");
+        Photo p = new Photo("Somewhere","TestPhoto", "Something");
         Photo expected = p;
         Photo actual   = facade.create(p);
         assertEquals(expected, actual);
@@ -70,7 +72,7 @@ class PhotoFacadeTest {
     @Test
     void createWithTags() {
         System.out.println("Testing create(Photo p) with tags added");
-        Photo p = new Photo("TestPhoto",1000, "description");
+        Photo p = new Photo("Somewhere","TestPhoto", "description");
         p.addTag(new Tag("Alfred"));
         p.addTag(new Tag("Roberta"));
         Photo expected = p;
@@ -81,7 +83,7 @@ class PhotoFacadeTest {
     @Test
     void createWithKnownTags() {
         System.out.println("Testing create(Photo p) with Tagren added");
-        Photo p = new Photo("TestPhoto",1099,"Something");
+        Photo p = new Photo("Somewhere","TestPhoto","Something");
         p.addTag(t1);
         p.addTag(t2);
         Photo expected = p;
@@ -102,6 +104,13 @@ class PhotoFacadeTest {
         System.out.println("Testing getAll()");
         int expected = 2;
         int actual = facade.getAll().size();
+        assertEquals(expected,actual);
+    }
+@Test
+    void getAllTags() {
+        System.out.println("Testing getAllTags()");
+        int expected = 2;
+        int actual = tagsFacade.getAllElements().size();
         assertEquals(expected,actual);
     }
 

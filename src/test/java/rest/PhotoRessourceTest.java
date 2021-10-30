@@ -3,6 +3,7 @@ package rest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dtos.PhotoDTO;
+import dtos.TagDTO;
 import entities.Photo;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
@@ -42,7 +43,7 @@ public class PhotoRessourceTest {
     private static final int SERVER_PORT = 7777;
     private static final String SERVER_URL = "http://localhost/api";
     private static Photo p1, p2;
-    private static Tag c1, c2;
+    private static Tag t1, t2;
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     static final URI BASE_URI = UriBuilder.fromUri(SERVER_URL).port(SERVER_PORT).build();
@@ -81,22 +82,22 @@ public class PhotoRessourceTest {
     @BeforeEach
     public void setUp() {
         EntityManager em = emf.createEntityManager();
-        p1 = new Photo("Henrik",76, "Some text");
-        p2 = new Photo("Betty",76, "Some other thext");
-        c1 = new Tag("Joseph");
-        c2 = new Tag("Alberta");
+        p1 = new Photo("Somewhere","Henrik", "Some text");
+        p2 = new Photo("Somewhere","Betty", "Some other thext");
+        t1 = new Tag("Joseph");
+        t2 = new Tag("Alberta");
 
 
-        p1.addTag(c1);
-        p1.addTag(c2);
+        p1.addTag(t1);
+        p1.addTag(t2);
 
 
         try {
             em.getTransaction().begin();
             em.createNamedQuery("Tag.deleteAllRows").executeUpdate();
             em.createNamedQuery("Photo.deleteAllRows").executeUpdate();
-            em.persist(c1);
-            em.persist(c2);
+            em.persist(t1);
+            em.persist(t2);
             em.persist(p1);
             em.persist(p2);
 
@@ -109,7 +110,7 @@ public class PhotoRessourceTest {
     @Test
     public void testServerIsUp() {
         System.out.println("Testing is server UP");
-        given().when().get("/Photo").then().statusCode(200);
+        given().when().get("/photo").then().statusCode(200);
     }
 
     @Test
@@ -117,7 +118,7 @@ public class PhotoRessourceTest {
         given()
                 .contentType(ContentType.JSON)
 //                .pathParam("id", p1.getId()).when()
-                .get("/Photo/{id}",p1.getId())
+                .get("/photo/{id}",p1.getId())
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.OK_200.getStatusCode())
@@ -131,7 +132,7 @@ public class PhotoRessourceTest {
         given()
                 .contentType(ContentType.JSON)
 //                .pathParam("id", p1.getId()).when()
-                .get("/Photo/{id}",999999999)
+                .get("/photo/{id}",999999999)
                 .then()
                 .assertThat()
                 .statusCode(HttpStatus.NOT_FOUND_404.getStatusCode())
@@ -141,8 +142,9 @@ public class PhotoRessourceTest {
 
     @Test
     public void testPrintResponse(){
-        Response response = given().when().get("/Photo/"+p1.getId());
+        Response response = given().when().get("/photo/"+p1.getId());
         ResponseBody body = response.getBody();
+
         System.out.println(body.prettyPrint());
 
         response
@@ -153,7 +155,7 @@ public class PhotoRessourceTest {
 
     @Test
     public void exampleJsonPathTest() {
-        Response res = given().get("/Photo/"+p1.getId());
+        Response res = given().get("/photo/"+p1.getId());
         assertEquals(200, res.getStatusCode());
         String json = res.asString();
         JsonPath jsonPath = new JsonPath(json);
@@ -162,25 +164,41 @@ public class PhotoRessourceTest {
 
     @Test
     public void getAllPhotos() throws Exception {
-        List<PhotoDTO> PhotoDTOs;
+        List<PhotoDTO> photoDTOs;
 
-        PhotoDTOs = given()
+        photoDTOs = given()
                 .contentType("application/json")
                 .when()
-                .get("/Photo")
+                .get("/photo")
                 .then()
                 .extract().body().jsonPath().getList("", PhotoDTO.class);
 
         PhotoDTO p1DTO = new PhotoDTO(p1);
         PhotoDTO p2DTO = new PhotoDTO(p2);
-        assertThat(PhotoDTOs, containsInAnyOrder(p1DTO, p2DTO));
+        assertThat(photoDTOs, containsInAnyOrder(p1DTO, p2DTO));
+
+    }
+
+    @Test
+    public void getAllTags() throws Exception {
+        List<TagDTO> tagDTOs;
+        tagDTOs = given()
+                .contentType("application/json")
+                .when()
+                .get("/photo/allTags")
+                .then()
+                .extract().body().jsonPath().getList("", TagDTO.class);
+
+        TagDTO t1DTO = new TagDTO(t1);
+        TagDTO t2DTO = new TagDTO(t2);
+        assertThat(tagDTOs, containsInAnyOrder(t1DTO, t2DTO));
 
     }
 
 
     @Test
     public void postTest() {
-        Photo p = new Photo("Helge",45,"TEXTEXT");
+        Photo p = new Photo("Somewhere","Helge","TEXTEXT");
         p.addTag(new Tag("Josephine"));
         PhotoDTO pdto = new PhotoDTO(p);
         String requestBody = GSON.toJson(pdto);
@@ -190,7 +208,7 @@ public class PhotoRessourceTest {
                 .and()
                 .body(requestBody)
                 .when()
-                .post("/Photo")
+                .post("/photo")
                 .then()
                 .assertThat()
                 .statusCode(200)
@@ -201,8 +219,8 @@ public class PhotoRessourceTest {
 
     @Test
     public void updateTest() {
-        p2.addTag(c2);
-        p2.setYear(23);
+        p2.addTag(t2);
+        p2.setPhotoTxt("NEW TEXT");
         PhotoDTO pdto = new PhotoDTO(p2);
         String requestBody = GSON.toJson(pdto);
 
@@ -211,13 +229,13 @@ public class PhotoRessourceTest {
                 .and()
                 .body(requestBody)
                 .when()
-                .put("/Photo/"+p2.getId())
+                .put("/photo/"+p2.getId())
                 .then()
                 .assertThat()
                 .statusCode(200)
                 .body("id", equalTo(p2.getId()))
                 .body("name", equalTo("Betty"))
-                .body("year", equalTo(23))
+                .body("description", equalTo(23))
                 .body("tags", hasItems(hasEntry("name","Alberta")));
     }
 
@@ -226,7 +244,7 @@ public class PhotoRessourceTest {
         given()
                 .contentType(ContentType.JSON)
                 .pathParam("id", p2.getId())
-                .delete("/Photo/{id}")
+                .delete("/photo/{id}")
                 .then()
                 .statusCode(200)
                 .body("id",equalTo(p2.getId()));

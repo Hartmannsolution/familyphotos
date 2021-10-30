@@ -1,21 +1,24 @@
 package businessfacades;
 
 import datafacades.IDataFacade;
+import datafacades.IExtraFunc;
 import datafacades.PhotoFacade;
 import dtos.PhotoDTO;
-import dtos.PhotoDTO;
+import dtos.TagDTO;
 import entities.Photo;
-import entities.Photo;
+import entities.Tag;
 import errorhandling.EntityNotFoundException;
 import utils.EMF_Creator;
 
 import java.util.List;
 
-public class PhotoDTOFacade implements IDataFacade<PhotoDTO> {
+public class PhotoDTOFacade implements IDataFacade<PhotoDTO>, IExtraFunc<TagDTO> {
     private static IDataFacade<PhotoDTO> instance;
     private static IDataFacade<Photo> photoFacade;
-
+    private static IExtraFunc<Tag> tagFacade;
+    private static IExtraFunc<TagDTO> tagDTOFacade;
     //Private Constructor to ensure Singleton
+
     private PhotoDTOFacade() {}
 
     public static IDataFacade<PhotoDTO> getFacade() {
@@ -24,6 +27,13 @@ public class PhotoDTOFacade implements IDataFacade<PhotoDTO> {
             instance = new PhotoDTOFacade();
         }
         return instance;
+    }
+    public static IExtraFunc<TagDTO> getTagFacade() {
+        if (tagDTOFacade == null) {
+            tagFacade = PhotoFacade.getTagFacade(EMF_Creator.createEntityManagerFactory());
+            tagDTOFacade = new PhotoDTOFacade();
+        }
+        return tagDTOFacade;
     }
 
     @Override
@@ -58,5 +68,10 @@ public class PhotoDTOFacade implements IDataFacade<PhotoDTO> {
     @Override
     public PhotoDTO delete(int id) throws EntityNotFoundException {
         return new PhotoDTO(photoFacade.delete(id));
+    }
+
+    @Override
+    public List<TagDTO> getAllElements() {
+       return TagDTO.toList(tagFacade.getAllElements());
     }
 }

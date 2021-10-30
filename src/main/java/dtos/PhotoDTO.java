@@ -1,6 +1,5 @@
 package dtos;
 
-import businessfacades.TagDTO;
 import entities.Photo;
 
 import java.util.ArrayList;
@@ -10,8 +9,8 @@ import java.util.stream.Collectors;
 
 public class PhotoDTO {
     private int id;
+    private String location;
     private String name;
-    private int year;
     private int viewNo;
     private String description;
     private List<TagDTO> tags = new ArrayList();
@@ -19,8 +18,8 @@ public class PhotoDTO {
     public PhotoDTO(Photo photo) {
         if(photo.getId()!=null)
             this.id = photo.getId();
+        this.location = photo.getLocation();
         this.name = photo.getFileName();
-        this.year = photo.getYear();
         this.viewNo = photo.getViewNo();
         this.description = photo.getPhotoTxt();
         photo.getTags().forEach(tag->this.tags.add(new TagDTO(tag)));
@@ -31,7 +30,7 @@ public class PhotoDTO {
     }
 
     public Photo getEntity(){
-        Photo p = new Photo(this.name, this.year, this.description);
+        Photo p = new Photo(this.location,this.name, this.description);
         if(id != 0)
             p.setId(this.id);
         this.tags.forEach(tag->p.addTag(tag.getEntity()));
@@ -52,14 +51,6 @@ public class PhotoDTO {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public int getYear() {
-        return year;
-    }
-
-    public void setYear(int year) {
-        this.year = year;
     }
 
     public int getViewNo() {
@@ -91,11 +82,11 @@ public class PhotoDTO {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PhotoDTO photoDTO = (PhotoDTO) o;
-        return id == photoDTO.id && year == photoDTO.year && Objects.equals(name, photoDTO.name) && Objects.equals(description, photoDTO.description);
+        return id == photoDTO.id &&Objects.equals(name, photoDTO.name) && Objects.equals(description, photoDTO.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, year, description);
+        return Objects.hash(id, name, description);
     }
 }

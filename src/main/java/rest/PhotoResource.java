@@ -1,6 +1,8 @@
 package rest;
 
 import businessfacades.PhotoDTOFacade;
+import datafacades.IExtraFunc;
+import dtos.TagDTO;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import datafacades.IDataFacade;
@@ -10,12 +12,14 @@ import errorhandling.EntityNotFoundException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 //Todo Remove or change relevant parts before ACTUAL use
-@Path("Photo")
+@Path("photo")
 public class PhotoResource {
        
     private static final IDataFacade<PhotoDTO> FACADE =  PhotoDTOFacade.getFacade();
+    private static final IExtraFunc<TagDTO> TagFacade =  PhotoDTOFacade.getTagFacade();
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
             
     @GET
@@ -31,6 +35,15 @@ public class PhotoResource {
         PhotoDTO p = FACADE.getById(id);
         return Response.ok().entity(GSON.toJson(p)).build();
     }
+
+    @GET
+    @Path("/allTags")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response getAllTags() {
+        List<TagDTO> tagDtos = TagFacade.getAllElements();
+        return Response.ok().entity(GSON.toJson(tagDtos)).build();
+    }
+
 
     @POST
     @Produces({MediaType.APPLICATION_JSON})

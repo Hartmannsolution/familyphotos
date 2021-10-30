@@ -16,7 +16,7 @@ import java.util.List;
  * Purpose of this facade example is to show a facade used as a DB facade (only operating on entity classes - no DTOs
  * And to show case some different scenarios
  */
-public class PhotoFacade implements IDataFacade<Photo> {
+public class PhotoFacade implements IDataFacade<Photo>, IExtraFunc<Tag> {
 
     private static PhotoFacade instance;
     private static EntityManagerFactory emf;
@@ -31,6 +31,13 @@ public class PhotoFacade implements IDataFacade<Photo> {
      * @return an instance of this facade class.
      */
     public static IDataFacade<Photo> getFacade(EntityManagerFactory _emf) {
+        if (instance == null) {
+            emf = _emf;
+            instance = new PhotoFacade();
+        }
+        return instance;
+    }
+    public static IExtraFunc<Tag> getTagFacade(EntityManagerFactory _emf) {
         if (instance == null) {
             emf = _emf;
             instance = new PhotoFacade();
@@ -110,10 +117,18 @@ public class PhotoFacade implements IDataFacade<Photo> {
         return p;
     }
 
+
     public static void main(String[] args) {
         emf = EMF_Creator.createEntityManagerFactory();
         IDataFacade fe = getFacade(emf);
         fe.getAll().forEach(dto->System.out.println(dto));
     }
 
+    @Override
+    public List<Tag> getAllElements() {
+        EntityManager em = getEntityManager();
+        TypedQuery<Tag> query = em.createQuery("SELECT t FROM Tag t", Tag.class);
+        List<Tag> tags = query.getResultList();
+        return tags;
+    }
 }

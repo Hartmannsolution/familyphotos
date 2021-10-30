@@ -2,6 +2,7 @@ package datafacades;
 import java.util.List;
 
 import entities.Photo;
+import entities.Tag;
 import errorhandling.EntityNotFoundException;
 
 public interface IDataFacade<T> {
