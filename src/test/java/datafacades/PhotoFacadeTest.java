@@ -11,7 +11,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+@Disabled
 class PhotoFacadeTest {
 
     private static EntityManagerFactory emf;

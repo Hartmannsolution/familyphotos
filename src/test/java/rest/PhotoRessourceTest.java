@@ -37,7 +37,7 @@ import static org.hamcrest.Matchers.*;
 import org.junit.jupiter.api.BeforeAll;
 
 //Uncomment the line below, to temporarily disable this test
-//@Disabled
+@Disabled
 public class PhotoRessourceTest {
 
     private static final int SERVER_PORT = 7777;
